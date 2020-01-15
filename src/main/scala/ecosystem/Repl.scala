@@ -35,9 +35,9 @@ def handle(line: String): Unit =
     try parseCommand(line)
     catch
       case ParseException(msg) => return println(msg)
-  executeCommand(cmd)
+  cmd.execute()
 
-def executeCommand(cmd: Command): Unit =
+def (cmd: Command) execute(): Unit =
   println(s"Executing command: ${cmd}")
   cmd match
     case Show => projects.all.map(_.name).foreach(println)
@@ -74,8 +74,8 @@ def executeCommand(cmd: Command): Unit =
           git.close()
 
         case cmd: BuildCommand =>
-          if !project.isCloned then executeCommand(Clone(project.name))
-          project.dependencies.foreach { dep => executeCommand(PublishLocal(dep.name, cmd.scalaVersion)) }
+          if !project.isCloned then Clone(project.name).execute()
+          project.dependencies.foreach { dep => PublishLocal(dep.name, cmd.scalaVersion).execute() }
 
           cmd match
             case Compile(name, version) =>

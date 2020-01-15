@@ -1,4 +1,4 @@
-val dottyVersion = "0.21.0-RC1"
+val dottyVersion = "0.22.0-bin-SNAPSHOT"
 
 lazy val root = project
   .in(file("."))
@@ -9,5 +9,9 @@ lazy val root = project
     scalaVersion := dottyVersion,
 
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
-    libraryDependencies += "org.jline" % "jline" % "3.13.3"
+    libraryDependencies += "org.jline" % "jline" % "3.13.3",
+    libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % "5.6.0.201912101111-r",
+    libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.30",
+
+    libraryDependencies += "com.github.pathikrit" % "better-files_2.13" % "3.8.0"
   )

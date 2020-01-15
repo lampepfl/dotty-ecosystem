@@ -1,16 +1,19 @@
 package ecosystem
 
-given Ecosystem
-  define("utest")(
+given projects: Ecosystem
+  defineMill("utest")(
     staging = "https://github.com/dotty-staging/utest.git",
-    upstream = "https://github.com/lihaoyi/utest.git"
+    upstream = "https://github.com/lihaoyi/utest.git",
+    baseCommand = version => s"""./mill -D dottyVersion="$version" utest.jvm[$version]"""
   )
-  define("oslib")(
+  defineMill("oslib")(
     staging = "https://github.com/dotty-staging/os-lib.git",
     upstream = "https://github.com/lihaoyi/os-lib.git",
+    baseCommand = version => s"""mill -i -D dottyVersion="$version" os[$version].test""",
     dependencies = List("utest", "sourcecode")
   )
-  define("sourcecode")(
+  defineMill("sourcecode")(
     staging = "https://github.com/dotty-staging/sourcecode.git",
-    upstream = "https://github.com/lihaoyi/sourcecode.git"
+    upstream = "https://github.com/lihaoyi/sourcecode.git",
+    baseCommand = version => s"""./mill -i -D dottyVersion="$version" sourcecode.jvm[$version]"""
   )

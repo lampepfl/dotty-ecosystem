@@ -1,7 +1,15 @@
 package ecosystem
 
-import annotation.tailrec
+import java.io.{ File => JFile }
+import scala.annotation.tailrec
+
+import better.files.File
+
+import org.eclipse.jgit.api._
+import org.eclipse.jgit.transport.URIish
+
 import org.jline.reader._
+
 
 @main def Repl =
   val reader = LineReaderBuilder.builder()
@@ -23,28 +31,58 @@ import org.jline.reader._
   loop()
 
 def handle(line: String): Unit =
-  val chunks = line.split(" ").toList
-  chunks match
-    case "show" :: name :: Nil =>
-      try
-        val project = name.asProject
-        out(s"""
-          |Project: ${project.name}
-          |Staging: ${project.staging}
-          |Upstream: ${project.upstream}
-          |Dependencies: ${project.dependencies.map(_.name).mkString(", ")}
-        """)
-      catch
-        case _: NoSuchElementException => println(s"Project not found: ${name}")
+  val cmd =
+    try parseCommand(line)
+    catch
+      case ParseException(msg) => return println(msg)
+  executeCommand(cmd)
 
-    case "exit" :: Nil => throw UserInterruptException("")
+def executeCommand(cmd: Command): Unit =
+  println(s"Executing command: ${cmd}")
+  cmd match
+    case Show => projects.all.map(_.name).foreach(println)
+    case Clean => workdir.clear()
+    case Exit => throw UserInterruptException("")
 
-    case _ => println(s"Command could not be interpreted: $line")
+    case cmd: ProjectCommand =>
+      val project =
+        try cmd.projectName.asProject
+        catch
+          case _: NoSuchElementException => return println(s"Project not found: ${cmd.projectName}")
 
-inline def out(str: String) = println(formatStr(str))
+      cmd match
+        case Show(name) =>
+          out(s"""
+            |Project: ${project.name}
+            |Staging: ${project.staging}
+            |Upstream: ${project.upstream}
+            |Dependencies: ${project.dependencies.map(_.name).mkString(", ")}
+          """)
 
-@tailrec def formatStr(str: String): String =
-  var res = str
-  res = str.stripMargin
-  if res.startsWith("\n") then res = res.tail
-  if res != str then formatStr(res) else res
+        case Clone(name) =>
+          val git = Git.cloneRepository()
+            .setURI(project.staging)
+            .setDirectory(project.dir.toJava)
+            .call()
+          git.remoteAdd
+            .setName("upstream")
+            .setUri(URIish(project.upstream))
+            .call()
+          git.fetch
+            .setRemote("upstream")
+            .call()
+          git.close()
+
+        case cmd: BuildCommand =>
+          if !project.isCloned then executeCommand(Clone(project.name))
+          project.dependencies.foreach { dep => executeCommand(PublishLocal(dep.name, cmd.scalaVersion)) }
+
+          cmd match
+            case Compile(name, version) =>
+              exec(project.compileCommand(version), project.dir)
+
+            case Test(name, version) =>
+              exec(project.testCommand(version), project.dir)
+
+            case PublishLocal(name, version) =>
+              exec(project.publishLocalCommand(version), project.dir)

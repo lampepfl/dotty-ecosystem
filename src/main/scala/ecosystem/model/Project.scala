@@ -1,6 +1,9 @@
 package ecosystem
+package model
 
 import better.files.File
+import org.eclipse.jgit.api._
+import org.eclipse.jgit.transport.URIish
 
 case class Project(
   name: String,
@@ -17,3 +20,9 @@ extension on (project: Project)(given e: Ecosystem) with
   def dependencies: Set[Project] = e.dependenciesOf(project.name)
   def dir: File = workdir/project.name
   def isCloned = project.dir.exists
+  def withGit[T](f: Git => T): Unit =
+    val git = Git.open(project.dir.toJava)
+    try f(git)
+    finally git.close()
+
+

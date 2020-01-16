@@ -1,4 +1,4 @@
-package ecosystem
+package ecosystem.impl
 
 import scala.annotation.tailrec
 import scala.sys.process._

@@ -1,48 +1,26 @@
 package ecosystem
 
-import java.io.{ File => JFile }
-import scala.annotation.tailrec
-
 import better.files.File
+import org.jline.reader.UserInterruptException
 
 import org.eclipse.jgit.api._
 import org.eclipse.jgit.transport.URIish
 
-import org.jline.reader._
+import ecosystem.impl._
+import ecosystem.model.{ given, _ }
 
 
-@main def Repl =
-  val reader = LineReaderBuilder.builder()
-    .variable(LineReader.HISTORY_FILE, "history")
-    .variable(LineReader.HISTORY_FILE_SIZE, 100)
-    .build()
-
-  @tailrec def loop(): Unit =
-    val line =
-      try reader.readLine("> ")
-      catch
-        case _: UserInterruptException => return println("User interrupt")
-        case _: EndOfFileException => return println("End of file")
-    try handle(line)
-    catch
-      case _: UserInterruptException => return println("Bye!")
-      case e: Exception => println(e.getMessage); e.printStackTrace()
-    loop()
-  loop()
-
-def handle(line: String): Unit =
-  val cmd =
-    try parseCommand(line)
-    catch
-      case ParseException(msg) => return println(msg)
-  cmd.execute()
-
-def (cmd: Command) execute(): Unit =
-  println(s"Executing command: ${cmd}")
+inline def (cmd: Command) execute(): Unit = executeCommand(cmd)
+def executeCommand(cmd: Command): Unit =
+  println(s">>> ${cmd}")
   cmd match
     case Show => projects.all.map(_.name).foreach(println)
-    case Clean => workdir.clear()
     case Exit => throw UserInterruptException("")
+    case Clone =>
+      if workdir.nonEmpty then println(s"Workdir $workdir is not empty")
+      else for p <- projects.all do Clone(p.name).execute()
+    case Update =>
+      for p <- projects.all do Update(p.name).execute()
 
     case cmd: ProjectCommand =>
       val project =
@@ -72,6 +50,13 @@ def (cmd: Command) execute(): Unit =
             .setRemote("upstream")
             .call()
           git.close()
+
+        case Update(name) =>
+          project.withGit { git =>
+            val pc = git.pull
+            pc.call()
+            git.fetch.setRemote("upstream").call()
+          }
 
         case cmd: BuildCommand =>
           if !project.isCloned then Clone(project.name).execute()

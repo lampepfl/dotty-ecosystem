@@ -1,5 +1,7 @@
 package ecosystem
 
+import ecosystem.model._
+
 given projects: Ecosystem
   defineMill("utest")(
     staging = "https://github.com/dotty-staging/utest.git",

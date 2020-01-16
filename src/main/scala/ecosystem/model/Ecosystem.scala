@@ -1,4 +1,4 @@
-package ecosystem
+package ecosystem.model
 
 import collection.mutable
 

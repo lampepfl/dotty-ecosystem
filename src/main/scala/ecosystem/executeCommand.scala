@@ -8,6 +8,7 @@ import org.eclipse.jgit.transport.URIish
 
 import ecosystem.impl._
 import ecosystem.model.{ given, _ }
+import ecosystem.data.{ given, _ }
 
 
 inline def (cmd: Command) execute(): Unit = executeCommand(cmd)
@@ -71,3 +72,13 @@ def executeCommand(cmd: Command): Unit =
 
             case PublishLocal(name, version) =>
               exec(project.publishLocalCommand(version), project.dir)
+
+
+        case Check(name) =>
+          val report = checkProject(project)
+          out(s"""
+            |Project: $name
+            |Main branch: ${report.mainBranch}
+            |Ahead upstream: ${report.aheadUpstream}
+            |Behind upstream: ${report.behindUpstream}
+          """)

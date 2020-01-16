@@ -1,4 +1,4 @@
-package ecosystem
+package ecosystem.data
 
 import better.files.File
 

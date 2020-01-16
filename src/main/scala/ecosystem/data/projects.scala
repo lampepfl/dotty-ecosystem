@@ -1,4 +1,4 @@
-package ecosystem
+package ecosystem.data
 
 import ecosystem.model._
 

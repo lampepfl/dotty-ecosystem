@@ -62,3 +62,6 @@ def doWhileTracking[T](repo: Repository, branch: String, remote: String, tracked
   config.save()
 
   result
+
+def checkPredicate[T](value: T, predicate: T => Boolean, show: T => String = { (t: T) => t.toString }) =
+  if predicate(value) then green(show(value)) else red(show(value))

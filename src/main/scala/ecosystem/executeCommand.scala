@@ -56,6 +56,7 @@ def executeCommand(cmd: Command): Unit =
             |Project: ${project.name}
             |Staging: ${project.origin}
             |Upstream: ${project.upstream}
+            |Upstream branch: upstream/${project.upstreamBranch}
             |Dependencies: ${project.dependencies.map(_.name).mkString(", ")}
           """)
 
@@ -98,12 +99,10 @@ def executeCommand(cmd: Command): Unit =
         case Check(name) =>
           UpdateDotty.execute()
           val report = checkProject(project)
+
           out(s"""
-            |Project: $name
-            |Main branch: ${report.mainBranch}
-            |Upstream branch: upstream/${project.upstreamBranch}
-            |Ahead upstream: ${report.aheadUpstream}
-            |Behind upstream: ${report.behindUpstream}
-            |Origin head: ${report.originHeadHash}
-            |Dotty CI hash: ${report.ciHash}
+            |Main branch: ${checkPredicate(report.mainBranch, _ == "dotty-community-build")}
+            |Ahead upstream: ${checkPredicate(report.aheadUpstream, _ == 0)}
+            |Behind upstream: ${checkPredicate(report.behindUpstream, _ == 0)}
+            |CI hash == Origin head hash: ${checkPredicate((report.ciHash, report.originHeadHash), t => t._1 == t._2, t => s"${t._1} == ${t._2}")}
           """)

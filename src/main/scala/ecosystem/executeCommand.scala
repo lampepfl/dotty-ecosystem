@@ -25,9 +25,22 @@ def executeCommand(cmd: Command): Unit =
     case Update =>
       for p <- projects.all do Update(p.name).execute()
 
-    // case Check =>
-    //   UpdateDotty.execute()
-    //   for p <- projects.all do checkProject(project)
+    case Check =>
+      // UpdateDotty.execute()
+      val ciTrackingCache = buildCiTrackingCache()
+      val reportTableHeader = "Project" :: "Branch" :: "Ahead" :: "Behind" :: "CI Tracking" :: Nil
+      val reportTableValues =
+        for
+          project <- projects.all
+          report = checkProject(project, ciTrackingCache)
+        yield
+          val mainBranch     = checkPredicate(report.mainBranch, _ == "dotty-community-build")
+          val aheadUpstream  = checkPredicate(report.aheadUpstream, _ == 0)
+          val behindUpstream = checkPredicate(report.behindUpstream, _ == 0)
+          val ciTracking     = if report.ciHash == report.originHeadHash then green("√") else red("X")
+          project.name :: mainBranch :: aheadUpstream :: behindUpstream :: ciTracking :: Nil
+      val reportTable: List[List[String]] = reportTableHeader :: reportTableValues
+      out(Tabulator.format(reportTable))
 
     case UpdateDotty =>
       val git =

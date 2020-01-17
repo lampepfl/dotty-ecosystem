@@ -27,7 +27,7 @@ def executeCommand(cmd: Command): Unit =
       for p <- projects.all do Update(p.name).execute()
 
     case Check =>
-      // UpdateDotty.execute()
+      UpdateDotty.execute()
       val ciTrackingCache = buildCiTrackingCache()
       val reportTableHeader = "Project" :: "Branch" :: "Ahead" :: "Behind" :: "CI Tracking" :: Nil
       val reportTableValues =

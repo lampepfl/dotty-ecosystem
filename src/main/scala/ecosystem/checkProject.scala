@@ -5,6 +5,7 @@ import better.files.File
 import org.eclipse.jgit.lib._
 import org.eclipse.jgit.api._
 import org.eclipse.jgit.transport.URIish
+import org.eclipse.jgit.submodule.SubmoduleWalk
 
 import ecosystem.impl._
 import ecosystem.model.{ given, _ }
@@ -13,17 +14,32 @@ import ecosystem.data.{ given, _ }
 def checkProject(project: CommunityProject): CheckReport = project.withGit { git =>
   val repo = git.getRepository
   val branch = s"${repo.getBranch}"
-  doWhileTracking(repo, branch, "upstream", project.upstreamBranch) {
-    val trackingStatus = BranchTrackingStatus.of(repo, branch)
-    CheckReport(branch, trackingStatus.getAheadCount, trackingStatus.getBehindCount)
+  val trackingStatus = doWhileTracking(repo, branch, "upstream", project.upstreamBranch) {
+    BranchTrackingStatus.of(repo, branch)
   }
+  val (ciHash, originHeadHash) = ciTracking(project, git)
+  CheckReport(
+    mainBranch = branch,
+    aheadUpstream = trackingStatus.getAheadCount,
+    behindUpstream = trackingStatus.getBehindCount,
+    ciHash = ciHash,
+    originHeadHash = originHeadHash
+  )
 }
 
 /** Which commit does the Dotty CI run the tests against? */
-def ciTracking(project: CommunityProject) =
-  dotty.withGit { dottyGit => project.withGit { projectGit =>
+def ciTracking(project: CommunityProject, projectGit: Git): (String, String) =
+  dotty.withGit { dottyGit =>
+    val walk = SubmoduleWalk.forIndex(dottyGit.getRepository)
+    while
+      walk.next() &&
+      !walk.getModuleName.endsWith(s"/${project.name}")
+    do ()
 
-  }}
+    val ciHash = walk.getHead.getName
+    val originHeadHash = projectGit.getRepository.findRef("HEAD").getObjectId.getName
+    (ciHash, originHeadHash)
+  }
 
 def doWhileTracking[T](repo: Repository, branch: String, remote: String, trackedBranch: String)(action: => T): T =
   val config = repo.getConfig

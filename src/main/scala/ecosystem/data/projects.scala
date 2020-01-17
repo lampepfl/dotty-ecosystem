@@ -8,7 +8,7 @@ given projects: Ecosystem
     upstream = "https://github.com/lihaoyi/utest.git",
     baseCommand = version => s"""./mill -D dottyVersion="$version" utest.jvm[$version]"""
   )
-  defineMill("oslib")(
+  defineMill("os-lib")(
     origin = "https://github.com/dotty-staging/os-lib.git",
     upstream = "https://github.com/lihaoyi/os-lib.git",
     baseCommand = version => s"""mill -i -D dottyVersion="$version" os[$version].test""",

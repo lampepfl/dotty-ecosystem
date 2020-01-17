@@ -1,5 +1,7 @@
 package ecosystem
 
+import collection.JavaConverters.mapAsScalaMapConverter
+
 import better.files.File
 import org.jline.reader.UserInterruptException
 
@@ -26,15 +28,18 @@ def executeCommand(cmd: Command): Unit =
     case UpdateDotty =>
       val git =
         if !dotty.isCloned
-          out("Dotty is not cloned yet, cloning")
-          Git.cloneRepository()
+          out("Dotty is not cloned yet, cloning. This might take 1-2 minutes.")
+          val git0 = Git.cloneRepository()
             .setURI(dotty.origin)
             .setDirectory(dotty.dir.toJava)
             .call()
+          out("Initializing submodules.")
+          git0.submoduleInit.call()
+          git0
         else Git.open(dotty.dir.toJava)
-      println("Pulling the latest Dotty changes")
+      out("Pulling the latest Dotty changes")
       git.pull.call()
-      println("Updating Dotty submodules")
+      out("Updating Dotty submodules. If working against a fresh clone, this might take a few minutes.")
       git.submoduleUpdate.call()
       git.close()
 
@@ -43,6 +48,7 @@ def executeCommand(cmd: Command): Unit =
         try cmd.projectName.asProject
         catch
           case _: NoSuchElementException => return println(s"Project not found: ${cmd.projectName}")
+      if !project.isCloned && !cmd.isInstanceOf[Clone] then Clone(project.name).execute()
 
       cmd match
         case Show(name) =>
@@ -76,7 +82,6 @@ def executeCommand(cmd: Command): Unit =
         case Clean(name) => exec(project.cleanCommand, project.dir)
 
         case cmd: BuildCommand =>
-          if !project.isCloned then Clone(project.name).execute()
           project.dependencies.foreach { dep => PublishLocal(dep.name, cmd.scalaVersion).execute() }
 
           cmd match
@@ -99,4 +104,6 @@ def executeCommand(cmd: Command): Unit =
             |Upstream branch: upstream/${project.upstreamBranch}
             |Ahead upstream: ${report.aheadUpstream}
             |Behind upstream: ${report.behindUpstream}
+            |Origin head: ${report.originHeadHash}
+            |Dotty CI hash: ${report.ciHash}
           """)

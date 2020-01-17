@@ -59,6 +59,8 @@ def executeCommand(cmd: Command): Unit =
             git.fetch.setRemote("upstream").call()
           }
 
+        case Clean(name) => exec(project.cleanCommand, project.dir)
+
         case cmd: BuildCommand =>
           if !project.isCloned then Clone(project.name).execute()
           project.dependencies.foreach { dep => PublishLocal(dep.name, cmd.scalaVersion).execute() }

@@ -5,7 +5,9 @@ import scala.sys.process._
 
 import better.files.File
 
-def exec(cmd: String, workdir: File) = Process(cmd, workdir.toJava).!
+def exec(cmd: String, workdir: File) =
+  println(s"$$ $cmd")
+  Process(cmd, workdir.toJava).!
 
 inline def out(str: String) = println(formatStr(str))
 

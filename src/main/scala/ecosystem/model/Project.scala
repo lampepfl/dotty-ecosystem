@@ -6,6 +6,7 @@ import org.eclipse.jgit.api._
 import org.eclipse.jgit.transport.URIish
 
 import ecosystem.data.workdir
+import ecosystem.impl
 
 
 case class Project(
@@ -15,6 +16,7 @@ case class Project(
   compileCommand: String => String,  // Generate command from Scala version
   testCommand: String => String,
   publishLocalCommand: String => String,
+  cleanCommand: String,
 )
 
 def (name: String) asProject (given e: Ecosystem) = e.project(name)
@@ -29,5 +31,6 @@ extension on (project: Project)(given e: Ecosystem) with
       try f(git)
       finally git.close()
     res
+  // inline def exec(cmd: String): Unit = impl.exec(cmd, project.dir.toJava)
 
 

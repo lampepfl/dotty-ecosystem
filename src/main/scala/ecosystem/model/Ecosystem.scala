@@ -18,7 +18,8 @@ class Ecosystem
       upstream,
       version => s"${baseCommand(version)}.compile",
       version => s"${baseCommand(version)}.test",
-      version => s"${baseCommand(version)}.publishLocal"
+      version => s"${baseCommand(version)}.publishLocal",
+      "rm -rf out/"
     )
     projectsStore.update(name, project)
     for depString <- dependencies do

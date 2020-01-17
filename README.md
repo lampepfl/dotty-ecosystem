@@ -6,5 +6,6 @@
     1. Main branch name is standardized.
     2. Dotty CI points to the latest commit.
     3. Even with upstream.
+    4. Staging area clear, no unstaged changes.
 5. Commands are provided to help the user overview and address each of the sanity issues in a standardized way.
 6. Commands are simple and do not push to the repos.

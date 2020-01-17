@@ -9,17 +9,19 @@ class Ecosystem
   protected def defineMill(name: String)(
       staging: String,
       upstream: String,
+      upstreamBranch: String = "master",
       baseCommand: String => String,
       dependencies: List[String] = Nil
     ): Project =
     val project = Project(
-      name,
-      staging,
-      upstream,
-      version => s"${baseCommand(version)}.compile",
-      version => s"${baseCommand(version)}.test",
-      version => s"${baseCommand(version)}.publishLocal",
-      "rm -rf out/"
+      name = name,
+      staging = staging,
+      upstream = upstream,
+      upstreamBranch = upstreamBranch,
+      compileCommand = version => s"${baseCommand(version)}.compile",
+      testCommand = version => s"${baseCommand(version)}.test",
+      publishLocalCommand = version => s"${baseCommand(version)}.publishLocal",
+      cleanCommand = "rm -rf out/"
     )
     projectsStore.update(name, project)
     for depString <- dependencies do

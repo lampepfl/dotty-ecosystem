@@ -81,6 +81,7 @@ def executeCommand(cmd: Command): Unit =
           out(s"""
             |Project: $name
             |Main branch: ${report.mainBranch}
+            |Upstream branch: upstream/${project.upstreamBranch}
             |Ahead upstream: ${report.aheadUpstream}
             |Behind upstream: ${report.behindUpstream}
           """)

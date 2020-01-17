@@ -13,6 +13,7 @@ case class Project(
   name: String,
   staging: String,
   upstream: String,
+  upstreamBranch: String,
   compileCommand: String => String,  // Generate command from Scala version
   testCommand: String => String,
   publishLocalCommand: String => String,

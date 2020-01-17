@@ -1,3 +1,18 @@
+![Screenshot](/demo.png?raw=true "Screenshot")
+<!-- <img src="/demo.png?raw=true" width="500"> -->
+
+# Get started
+To see the status of the community build:
+
+1. Clone this repo.
+2. Run `sbt run`. This will open a console.
+3. Run `clone` to clone all the projects under the `/repos` dir. The list of the projects is in the `src/main/scala/ecosystem/data/projects.scala` file.
+4. Run `check` to get the status of the build.
+
+All the commands are available under `src/main/scala/ecosystem/executeCommand.scala`. Every command object's overridden `toString` method shows what to type in the console to run the command.
+
+So far, `BuildCommand`s are unsupported for SBT projects.
+
 # Community build policy [draft]
 1. Each project consists of the origin and upstream branch.
 2. The syncing is done via merges: first merge upstream into origin, then submit PR to upstream.

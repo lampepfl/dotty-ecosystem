@@ -10,7 +10,7 @@ import ecosystem.impl._
 import ecosystem.model.{ given, _ }
 import ecosystem.data.{ given, _ }
 
-def checkProject(project: Project): CheckReport = project.withGit { git =>
+def checkProject(project: CommunityProject): CheckReport = project.withGit { git =>
   val repo = git.getRepository
   val branch = s"${repo.getBranch}"
   doWhileTracking(repo, branch, "upstream", project.upstreamBranch) {
@@ -18,6 +18,12 @@ def checkProject(project: Project): CheckReport = project.withGit { git =>
     CheckReport(branch, trackingStatus.getAheadCount, trackingStatus.getBehindCount)
   }
 }
+
+/** Which commit does the Dotty CI run the tests against? */
+def ciTracking(project: CommunityProject) =
+  dotty.withGit { dottyGit => project.withGit { projectGit =>
+
+  }}
 
 def doWhileTracking[T](repo: Repository, branch: String, remote: String, trackedBranch: String)(action: => T): T =
   val config = repo.getConfig

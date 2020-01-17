@@ -23,6 +23,21 @@ def executeCommand(cmd: Command): Unit =
     case Update =>
       for p <- projects.all do Update(p.name).execute()
 
+    case UpdateDotty =>
+      val git =
+        if !dotty.isCloned
+          out("Dotty is not cloned yet, cloning")
+          Git.cloneRepository()
+            .setURI(dotty.origin)
+            .setDirectory(dotty.dir.toJava)
+            .call()
+        else Git.open(dotty.dir.toJava)
+      println("Pulling the latest Dotty changes")
+      git.pull.call()
+      println("Updating Dotty submodules")
+      git.submoduleUpdate.call()
+      git.close()
+
     case cmd: ProjectCommand =>
       val project =
         try cmd.projectName.asProject
@@ -33,14 +48,14 @@ def executeCommand(cmd: Command): Unit =
         case Show(name) =>
           out(s"""
             |Project: ${project.name}
-            |Staging: ${project.staging}
+            |Staging: ${project.origin}
             |Upstream: ${project.upstream}
             |Dependencies: ${project.dependencies.map(_.name).mkString(", ")}
           """)
 
         case Clone(name) =>
           val git = Git.cloneRepository()
-            .setURI(project.staging)
+            .setURI(project.origin)
             .setDirectory(project.dir.toJava)
             .call()
           git.remoteAdd
@@ -54,8 +69,7 @@ def executeCommand(cmd: Command): Unit =
 
         case Update(name) =>
           project.withGit { git =>
-            val pc = git.pull
-            pc.call()
+            git.pull.call()
             git.fetch.setRemote("upstream").call()
           }
 
@@ -77,6 +91,7 @@ def executeCommand(cmd: Command): Unit =
 
 
         case Check(name) =>
+          UpdateDotty.execute()
           val report = checkProject(project)
           out(s"""
             |Project: $name

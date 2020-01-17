@@ -3,19 +3,19 @@ package ecosystem.model
 import collection.mutable
 
 class Ecosystem
-  private val projectsStore = mutable.Map.empty[String, Project]
+  private val projectsStore = mutable.Map.empty[String, CommunityProject]
   private val dependenciesStore = mutable.Map.empty[String, Set[String]]
 
   protected def defineMill(name: String)(
-      staging: String,
+      origin: String,
       upstream: String,
       upstreamBranch: String = "master",
       baseCommand: String => String,
       dependencies: List[String] = Nil
-    ): Project =
-    val project = Project(
+    ): CommunityProject =
+    val project = CommunityProject(
       name = name,
-      staging = staging,
+      origin = origin,
       upstream = upstream,
       upstreamBranch = upstreamBranch,
       compileCommand = version => s"${baseCommand(version)}.compile",

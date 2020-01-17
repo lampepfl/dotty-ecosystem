@@ -23,10 +23,11 @@ case class Compile     (projectName: String, scalaVersion: String) extends Build
 case class Test        (projectName: String, scalaVersion: String) extends BuildCommand   { override def toString = s"test $projectName $scalaVersion" }
 case class PublishLocal(projectName: String, scalaVersion: String) extends BuildCommand   { override def toString = s"publishLocal $projectName $scalaVersion" }
 
-case object Show   extends Command { override def toString = "show" }
-case object Exit   extends Command { override def toString = "exit" }
-case object Clone  extends Command { override def toString = "clone" }
-case object Update extends Command { override def toString = "update" }
+case object Show   extends Command      { override def toString = "show" }
+case object Exit   extends Command      { override def toString = "exit" }
+case object Clone  extends Command      { override def toString = "clone" }
+case object Update extends Command      { override def toString = "update" }
+case object UpdateDotty extends Command { override def toString = "updateDotty" }
 
 case class ParseException(msg: String) extends Exception(msg)
 
@@ -43,6 +44,7 @@ def parseCommand(line: String): Command =
     case "clone" :: project :: Nil => Clone(project)
     case "update" :: Nil => Update
     case "update" :: project :: Nil => Update(project)
+    case "updateDotty" :: Nil => UpdateDotty
     case "check" :: project :: Nil => Check(project)
     case "clean" :: project :: Nil => Clean(project)
     case "compile" :: project :: args => Compile(project, versionArg(args))

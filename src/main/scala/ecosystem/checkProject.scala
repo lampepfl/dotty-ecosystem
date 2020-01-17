@@ -20,8 +20,14 @@ def checkProject(project: CommunityProject, ciTrackingCache: Map[String, String]
   }
   val originHeadHash = git.getRepository.findRef("HEAD").getObjectId.getName
   val ciHash =
-    if ciTrackingCache eq null then buildCiTrackingCache()(project.name)
-    else ciTrackingCache(project.name)
+    try
+      if ciTrackingCache eq null then buildCiTrackingCache()(project.name)
+      else ciTrackingCache(project.name)
+    catch
+      case e: Throwable =>
+        println(s"""\u001b[43;1m\u001b[30mDEBUG:\u001b[0m project = ${project}""")
+        println(s"""\u001b[43;1m\u001b[30mDEBUG:\u001b[0m ciTrackingCache = ${ciTrackingCache}""")
+        throw e
   CheckReport(
     mainBranch = branch,
     aheadUpstream = trackingStatus.getAheadCount,

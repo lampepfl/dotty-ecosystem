@@ -21,8 +21,7 @@ def executeCommand(cmd: Command): Unit =
     case Show => projects.all.map(_.name).foreach(println)
     case Exit => throw UserInterruptException("")
     case Clone =>
-      if workdir.nonEmpty then println(s"Workdir $workdir is not empty")
-      else for p <- projects.all do Clone(p.name).execute()
+      for p <- projects.all if !p.isCloned do Clone(p.name).execute()
     case Update =>
       for p <- projects.all do Update(p.name).execute()
 

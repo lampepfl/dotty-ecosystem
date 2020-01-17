@@ -9,3 +9,11 @@
     4. Staging area clear, no unstaged changes.
 5. Commands are provided to help the user overview and address each of the sanity issues in a standardized way.
 6. Commands are simple and do not push to the repos.
+
+## Reasoning
+**(2) Why not rebase?**
+- To trivially keep the older versions of the library that are ported to Dotty available and referable to via a commit. This way, a project that depends on a version of the library will not find itself without that dependency because that library released a newer version.
+- Second, to allow for long-living port branches. When these branches get large, it is much harder to rebase them because we need to resolve conflicts one commit at a time.
+
+**(3) Why not just modify the build?**
+This is only Mill-related since SBT has the capability in question. It is needed for easy integration with our CI and when testing locally against the Dotty snapshot version. If our branch is modified and doesn't track the upstream perfectly, this complicates syncing with upstream. If our branch tracks upstream perfectly, the sync is trivially done via first merging the upstream and then submitting the PR to upstream. If it doesn't track perfectly, we need to take care of removing and reintroducing the private changes before submitting the PR. Introducing the capability to specify an extra cross Scala version into the community mill projects is non-intrusive so seems to be an optimal solution.

@@ -21,6 +21,7 @@ trait Project
 case class CommunityProject(
   name: String,
   origin: String,
+  originBranch: String,
   upstream: String,
   upstreamBranch: String,
   compileCommand: String => String,  // Generate command from Scala version

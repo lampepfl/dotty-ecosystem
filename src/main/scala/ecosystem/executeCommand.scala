@@ -89,10 +89,20 @@ def executeCommand(cmd: Command): Unit =
           git.fetch
             .setRemote("upstream")
             .call()
+          if project.originBranch ne null
+            git.checkout
+              .setCreateBranch(true)
+              .setName(project.originBranch)
+              .call()
           git.close()
 
         case Update(name) =>
           project.withGit { git =>
+            if project.originBranch ne null
+              git.checkout
+                .setCreateBranch(true)
+                .setName(project.originBranch)
+                .call()
             git.pull.call()
             git.fetch.setRemote("upstream").call()
           }

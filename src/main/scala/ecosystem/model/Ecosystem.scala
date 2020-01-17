@@ -14,6 +14,7 @@ class Ecosystem
 
   protected def defineMill(name: String)(
       origin: String,
+      originBranch: String = null,
       upstream: String,
       upstreamBranch: String = "master",
       baseCommand: String => String,
@@ -22,6 +23,7 @@ class Ecosystem
     val project = CommunityProject(
       name = name,
       origin = origin,
+      originBranch = originBranch,
       upstream = upstream,
       upstreamBranch = upstreamBranch,
       compileCommand = version => s"${baseCommand(version)}.compile",
@@ -34,12 +36,14 @@ class Ecosystem
 
   protected def defineSbt(name: String)(
       origin: String,
+      originBranch: String = null,
       upstream: String,
       upstreamBranch: String = "master"
     ): CommunityProject =
     val project = CommunityProject(
       name = name,
       origin = origin,
+      originBranch = originBranch,
       upstream = upstream,
       upstreamBranch = upstreamBranch,
       compileCommand = null,  // TODO

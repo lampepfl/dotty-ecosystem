@@ -50,7 +50,8 @@ given projects: Ecosystem
 
   defineSbt("scalatest")(
     origin = "https://github.com/dotty-staging/scalatest.git",
-    upstream = "https://github.com/scalatest/scalatest.git"
+    upstream = "https://github.com/scalatest/scalatest.git",
+    upstreamBranch = "3.1.x"
   )
 
   defineSbt("scopt")(
@@ -82,6 +83,7 @@ given projects: Ecosystem
 
   defineSbt("stdLib213")(
     origin = "https://github.com/dotty-staging/scala.git",
+    originBranch = "fix-string",
     upstream = "https://github.com/scala/scala.git",
     upstreamBranch = "2.13.x"
   )
@@ -99,6 +101,7 @@ given projects: Ecosystem
 
   defineSbt("shapeless")(
     origin = "https://github.com/dotty-staging/shapeless.git",
+    originBranch = "shapeless-3-staging",
     upstream = "https://github.com/milessabin/shapeless.git",
     upstreamBranch = "shapeless-3-staging"
   )

@@ -11,13 +11,16 @@ import ecosystem.impl._
 import ecosystem.model.{ given, _ }
 import ecosystem.data.{ given, _ }
 
-def checkProject(project: CommunityProject): CheckReport = project.withGit { git =>
+def checkProject(project: CommunityProject, ciTrackingCache: Map[String, String] = null): CheckReport = project.withGit { git =>
   val repo = git.getRepository
   val branch = s"${repo.getBranch}"
   val trackingStatus = doWhileTracking(repo, branch, "upstream", project.upstreamBranch) {
     BranchTrackingStatus.of(repo, branch)
   }
-  val (ciHash, originHeadHash) = ciTracking(project, git)
+  val originHeadHash = git.getRepository.findRef("HEAD").getObjectId.getName
+  val ciHash =
+    if ciTrackingCache eq null then buildCiTrackingCache()(project.name)
+    else ciTrackingCache(project.name)
   CheckReport(
     mainBranch = branch,
     aheadUpstream = trackingStatus.getAheadCount,
@@ -27,19 +30,14 @@ def checkProject(project: CommunityProject): CheckReport = project.withGit { git
   )
 }
 
-/** Which commit does the Dotty CI run the tests against? */
-def ciTracking(project: CommunityProject, projectGit: Git): (String, String) =
-  dotty.withGit { dottyGit =>
-    val walk = SubmoduleWalk.forIndex(dottyGit.getRepository)
-    while
-      walk.next() &&
-      !walk.getModuleName.endsWith(s"/${project.name}")
-    do ()
-
-    val ciHash = walk.getHead.getName
-    val originHeadHash = projectGit.getRepository.findRef("HEAD").getObjectId.getName
-    (ciHash, originHeadHash)
-  }
+def buildCiTrackingCache() = dotty.withGit { dottyGit =>
+  var cache = Map.empty[String, String]
+  val walk = SubmoduleWalk.forIndex(dottyGit.getRepository)
+  while walk.next() do
+    val name = walk.getModuleName.split("/").last
+    cache = cache.updated(name, walk.getHead.getName)
+  cache
+}
 
 def doWhileTracking[T](repo: Repository, branch: String, remote: String, trackedBranch: String)(action: => T): T =
   val config = repo.getConfig

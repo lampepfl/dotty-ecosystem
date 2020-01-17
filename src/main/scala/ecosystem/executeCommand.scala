@@ -25,6 +25,10 @@ def executeCommand(cmd: Command): Unit =
     case Update =>
       for p <- projects.all do Update(p.name).execute()
 
+    // case Check =>
+    //   UpdateDotty.execute()
+    //   for p <- projects.all do checkProject(project)
+
     case UpdateDotty =>
       val git =
         if !dotty.isCloned

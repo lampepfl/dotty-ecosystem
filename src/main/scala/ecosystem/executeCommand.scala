@@ -11,6 +11,7 @@ import org.eclipse.jgit.transport.URIish
 import ecosystem.impl._
 import ecosystem.model.{ given, _ }
 import ecosystem.data.{ given, _ }
+import ecosystem.rendering._
 
 
 inline def (cmd: Command) execute(): Unit = executeCommand(cmd)

@@ -1,4 +1,4 @@
-package ecosystem
+package ecosystem.rendering
 
 // Credits: https://stackoverflow.com/a/7542476
 object Tabulator {

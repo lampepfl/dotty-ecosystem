@@ -10,6 +10,7 @@ import org.eclipse.jgit.submodule.SubmoduleWalk
 import ecosystem.impl._
 import ecosystem.model.{ given, _ }
 import ecosystem.data.{ given, _ }
+import ecosystem.rendering._
 
 def checkProject(project: CommunityProject, ciTrackingCache: Map[String, String] = null): CheckReport = project.withGit { git =>
   val repo = git.getRepository

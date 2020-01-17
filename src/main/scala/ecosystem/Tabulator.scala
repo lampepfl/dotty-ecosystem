@@ -19,8 +19,7 @@ object Tabulator {
     rowSeparator ::
     List()).mkString("\n")
 
-  def formatRow(row: List[String], _colSizes: List[Int]) = {
-    val colSizes = (_colSizes.head + 1) :: _colSizes.tail  // head + 1 due to some weird bug where the leading | of a string gets eaten away
+  def formatRow(row: List[String], colSizes: List[Int]) = {
     val cells = for ((item, size) <- row.zip(colSizes)) yield if (size == 0) "" else
       item + " " * (size - stripColor(item).size)
     cells.mkString("|", "|", "|")

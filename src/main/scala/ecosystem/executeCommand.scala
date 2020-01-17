@@ -40,7 +40,7 @@ def executeCommand(cmd: Command): Unit =
           val ciTracking     = if report.ciHash == report.originHeadHash then green("√") else red("X")
           project.name :: mainBranch :: aheadUpstream :: behindUpstream :: ciTracking :: Nil
       val reportTable: List[List[String]] = reportTableHeader :: reportTableValues
-      out(Tabulator.format(reportTable))
+      println(Tabulator.format(reportTable))
 
     case UpdateDotty =>
       val git =

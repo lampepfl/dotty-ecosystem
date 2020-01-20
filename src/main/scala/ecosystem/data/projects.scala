@@ -20,14 +20,13 @@ given projects: Ecosystem
     baseCommand = version => s"""./mill -i -D dottyVersion="$version" sourcecode.jvm[$version]"""
   )
 
-
-  // TODO: below projects don't have commands
   defineMill("upickle")(
     origin = "https://github.com/dotty-staging/upickle.git",
     upstream = "https://github.com/lihaoyi/upickle.git",
-    baseCommand = null
+    baseCommand = version => s"""./mill -i -D dottyVersion="$version" ujson.jvm[$version]"""
   )
 
+  // TODO: below projects don't have commands
   defineSbt("algebra")(
     origin = "https://github.com/dotty-staging/algebra.git",
     upstream = "https://github.com/typelevel/algebra.git"

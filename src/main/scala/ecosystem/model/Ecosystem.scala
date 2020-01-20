@@ -49,7 +49,7 @@ class Ecosystem
       compileCommand = null,  // TODO
       testCommand = null,
       publishLocalCommand = null,
-      cleanCommand = null,
+      cleanCommand = "rm -rf target/",
     )
     register(project, Nil)
     project

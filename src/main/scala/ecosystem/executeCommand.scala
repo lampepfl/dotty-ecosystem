@@ -1,11 +1,14 @@
 package ecosystem
 
-import collection.JavaConverters.mapAsScalaMapConverter
+import scala.language.implicitConversions
+import collection.JavaConverters._
 
 import better.files.File
 import org.jline.reader.UserInterruptException
 
 import org.eclipse.jgit.api._
+import org.eclipse.jgit.lib._
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException
 import org.eclipse.jgit.transport.URIish
 
 import ecosystem.impl._
@@ -89,20 +92,12 @@ def executeCommand(cmd: Command): Unit =
           git.fetch
             .setRemote("upstream")
             .call()
-          if project.originBranch ne null
-            git.checkout
-              .setCreateBranch(true)
-              .setName(project.originBranch)
-              .call()
+          checkoutBranchIfNotExists(project.originBranch, git)
           git.close()
 
         case Update(name) =>
           project.withGit { git =>
-            if project.originBranch ne null
-              git.checkout
-                .setCreateBranch(true)
-                .setName(project.originBranch)
-                .call()
+            checkoutBranchIfNotExists(project.originBranch, git)
             git.pull.call()
             git.fetch.setRemote("upstream").call()
           }
@@ -133,3 +128,22 @@ def executeCommand(cmd: Command): Unit =
             |Behind upstream: ${checkPredicate(report.behindUpstream, _ == 0)}
             |CI hash == Origin head hash: ${checkPredicate((report.ciHash, report.originHeadHash), t => t._1 == t._2, t => s"${t._1} == ${t._2}")}
           """)
+
+def checkoutBranchIfNotExists(branch: String, git: Git): Unit =
+  if branch ne null
+    println(yellow(s"[warn] A non-standard branch `$branch` was specified"))
+
+    val createBranch =
+      !git.branchList.call().asScala.exists(_.getName == Constants.R_HEADS + branch)
+
+    var cmd = git.checkout
+      .setCreateBranch(createBranch)
+      .setName(branch)
+
+    if createBranch then
+      println(s"Branch $branch does not exist and will now be created")
+      cmd = cmd
+        .setStartPoint(s"origin/$branch")
+        .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
+
+    cmd.call()

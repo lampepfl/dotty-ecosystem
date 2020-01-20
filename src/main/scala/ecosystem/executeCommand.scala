@@ -48,18 +48,18 @@ def executeCommand(cmd: Command): Unit =
     case UpdateDotty =>
       val git =
         if !dotty.isCloned
-          out("Dotty is not cloned yet, cloning. This might take 1-2 minutes.")
+          info("Dotty is not cloned yet, cloning. This might take 1-2 minutes.")
           val git0 = Git.cloneRepository()
             .setURI(dotty.origin)
             .setDirectory(dotty.dir.toJava)
             .call()
-          out("Initializing submodules.")
+          info("Initializing submodules.")
           git0.submoduleInit.call()
           git0
         else Git.open(dotty.dir.toJava)
-      out("Pulling the latest Dotty changes")
+      info("Pulling the latest Dotty changes")
       git.pull.call()
-      out("Updating Dotty submodules. If working against a fresh clone, this might take a few minutes.")
+      info("Updating Dotty submodules. If working against a fresh clone, this might take a few minutes.")
       git.submoduleUpdate.call()
       git.close()
 
@@ -67,18 +67,18 @@ def executeCommand(cmd: Command): Unit =
       val project =
         try cmd.projectName.asProject
         catch
-          case _: NoSuchElementException => return println(s"Project not found: ${cmd.projectName}")
+          case _: NoSuchElementException => return error(s"Project not found: ${cmd.projectName}")
       if !project.isCloned && !cmd.isInstanceOf[Clone] then Clone(project.name).execute()
 
       cmd match
         case Show(name) =>
-          out(s"""
+          println(s"""
             |Project: ${project.name}
             |Staging: ${project.origin}
             |Upstream: ${project.upstream}
             |Upstream branch: upstream/${project.upstreamBranch}
             |Dependencies: ${project.dependencies.map(_.name).mkString(", ")}
-          """)
+          """.stripMargin)
 
         case Clone(name) =>
           val git = Git.cloneRepository()
@@ -107,31 +107,32 @@ def executeCommand(cmd: Command): Unit =
         case cmd: BuildCommand =>
           project.dependencies.foreach { dep => PublishLocal(dep.name, cmd.scalaVersion).execute() }
 
+          def execBuild(shellCmd: String => String, version: String) =
+            if shellCmd ne null
+              exec(shellCmd(version), project.dir)
+            else
+              error(s"Project ${cmd.projectName} doesn't know the shell command to " +
+                s"execute for `$cmd`")
+
           cmd match
-            case Compile(name, version) =>
-              exec(project.compileCommand(version), project.dir)
-
-            case Test(name, version) =>
-              exec(project.testCommand(version), project.dir)
-
-            case PublishLocal(name, version) =>
-              exec(project.publishLocalCommand(version), project.dir)
-
+            case Compile(name, version) => execBuild(project.compileCommand, version)
+            case Test(name, version) => execBuild(project.testCommand, version)
+            case PublishLocal(name, version) => execBuild(project.publishLocalCommand, version)
 
         case Check(name) =>
           UpdateDotty.execute()
           val report = checkProject(project)
 
-          out(s"""
+          println(s"""
             |Main branch: ${checkPredicate(report.mainBranch, _ == "dotty-community-build")}
             |Ahead upstream: ${checkPredicate(report.aheadUpstream, _ == 0)}
             |Behind upstream: ${checkPredicate(report.behindUpstream, _ == 0)}
             |CI hash == Origin head hash: ${checkPredicate((report.ciHash, report.originHeadHash), t => t._1 == t._2, t => s"${t._1} == ${t._2}")}
-          """)
+          """.stripMargin)
 
 def checkoutBranchIfNotExists(branch: String, git: Git): Unit =
   if branch ne null
-    println(yellow(s"[warn] A non-standard branch `$branch` was specified"))
+    warning(s"A non-standard branch `$branch` was specified")
 
     val createBranch =
       !git.branchList.call().asScala.exists(_.getName == Constants.R_HEADS + branch)
@@ -141,7 +142,7 @@ def checkoutBranchIfNotExists(branch: String, git: Git): Unit =
       .setName(branch)
 
     if createBranch then
-      println(s"Branch $branch does not exist and will now be created")
+      info(s"Branch $branch does not exist and will now be created")
       cmd = cmd
         .setStartPoint(s"origin/$branch")
         .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)

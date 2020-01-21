@@ -31,7 +31,7 @@ class Ecosystem
       testCommand = version => s"${baseCommand(version)}.test",
       publishLocalCommand = version => s"${baseCommand(version)}.publishLocal",
       cleanCommand = "rm -rf out/",
-      submoduleName = if submoduleName ne null then submoduleName else name
+      submoduleName = Option(submoduleName).orNull
     )
     register(project, dependencies)
     project
@@ -41,19 +41,24 @@ class Ecosystem
       originBranch: String = null,
       upstream: String,
       upstreamBranch: String = "master",
-      submoduleName: String = null
+      submoduleName: String = null,
+      sbtCompileCommand: String = null,
+      sbtTestCommand: String = null,
+      sbtPublishLocalCommand: String = null,
     ): CommunityProject =
+    def sbtCommand(version: String, sbtSuffix: String) =
+      s"""sbt ";set updateOptions in Global ~= (_.withLatestSnapshots(false)) ;++$version! ;$sbtSuffix" """
     val project = CommunityProject(
       name = name,
       origin = origin,
       originBranch = originBranch,
       upstream = upstream,
       upstreamBranch = upstreamBranch,
-      compileCommand = null,  // TODO
-      testCommand = null,
-      publishLocalCommand = null,
+      compileCommand = Option(sbtCompileCommand).map(suffix => (version: String) => sbtCommand(version, suffix)).orNull,
+      testCommand = Option(sbtTestCommand).map(suffix => (version: String) => sbtCommand(version, suffix)).orNull,
+      publishLocalCommand = Option(sbtPublishLocalCommand).map(suffix => (version: String) => sbtCommand(version, suffix)).orNull,
       cleanCommand = "rm -rf target/",
-      submoduleName = if submoduleName ne null then submoduleName else name
+      submoduleName = Option(submoduleName).orNull
     )
     register(project, Nil)
     project

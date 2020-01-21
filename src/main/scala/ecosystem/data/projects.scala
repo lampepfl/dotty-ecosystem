@@ -57,7 +57,8 @@ given projects: Ecosystem
   defineSbt("scopt")(
     origin = "https://github.com/dotty-staging/scopt.git",
     upstream = "https://github.com/scopt/scopt.git",
-    upstreamBranch = "scopt4"
+    upstreamBranch = "scopt4",
+    sbtCompileCommand = "scoptJVM/compile",
   )
 
   defineSbt("squants")(
@@ -65,10 +66,11 @@ given projects: Ecosystem
     upstream = "https://github.com/typelevel/squants.git"
   )
 
-  // defineSbt("scala")(
+  // defineSbt("scalap")(
   //   origin = "https://github.com/dotty-staging/scala.git",
   //   upstream = "https://github.com/scala/scala.git",
-  //   upstreamBranch = "2.13.x"
+  //   upstreamBranch = "2.13.x",
+  //   submoduleName = "scala"
   // )
 
   defineSbt("minitest")(

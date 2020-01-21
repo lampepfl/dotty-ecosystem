@@ -31,7 +31,7 @@ class Ecosystem
       testCommand = version => s"${baseCommand(version)}.test",
       publishLocalCommand = version => s"${baseCommand(version)}.publishLocal",
       cleanCommand = "rm -rf out/",
-      submoduleName = Option(submoduleName).orNull
+      submoduleName = Option(submoduleName).getOrElse(name)
     )
     register(project, dependencies)
     project
@@ -58,7 +58,7 @@ class Ecosystem
       testCommand = Option(sbtTestCommand).map(suffix => (version: String) => sbtCommand(version, suffix)).orNull,
       publishLocalCommand = Option(sbtPublishLocalCommand).map(suffix => (version: String) => sbtCommand(version, suffix)).orNull,
       cleanCommand = "rm -rf target/",
-      submoduleName = Option(submoduleName).orNull
+      submoduleName = Option(submoduleName).getOrElse(name)
     )
     register(project, Nil)
     project

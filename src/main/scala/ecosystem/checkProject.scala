@@ -19,9 +19,8 @@ def checkProject(project: CommunityProject, ciTrackingCache: Map[String, String]
     BranchTrackingStatus.of(repo, branch)
   }
   val originHeadHash = git.getRepository.findRef("HEAD").getObjectId.getName
-  val ciHash =
-    if ciTrackingCache eq null then buildCiTrackingCache()(project.submoduleName)
-    else ciTrackingCache(project.submoduleName)
+  val ciHash = Option(ciTrackingCache).getOrElse(buildCiTrackingCache())(project.submoduleName)
+
   CheckReport(
     mainBranch = branch,
     aheadUpstream = trackingStatus.getAheadCount,

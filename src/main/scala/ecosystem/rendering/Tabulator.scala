@@ -2,14 +2,14 @@ package ecosystem.rendering
 
 // Credits: https://stackoverflow.com/a/7542476
 object Tabulator {
-  def format(table: List[List[String]]) = table match {
+  def format(data: List[List[String]]) = data match
     case List() => ""
-    case _ =>
-      val sizes = for (row <- table) yield (for (cell <- row) yield if (cell == null) 0 else stripColor(cell.toString).length)
+    case header :: body =>
+      val table = header.map(bold) :: body
+      val sizes = for (row <- table) yield (for (cell <- row) yield if (cell == null) 0 else stripDecorations(cell.toString).length)
       val colSizes = for (col <- sizes.transpose) yield col.max
       val rows = for (row <- table) yield formatRow(row, colSizes)
       formatRows(rowSeparator(colSizes), rows)
-  }
 
   def formatRows(rowSeparator: String, rows: List[String]): String = (
     rowSeparator ::
@@ -21,7 +21,7 @@ object Tabulator {
 
   def formatRow(row: List[String], colSizes: List[Int]) = {
     val cells = for ((item, size) <- row.zip(colSizes)) yield if (size == 0) "" else
-      item + " " * (size - stripColor(item).size)
+      item + " " * (size - stripDecorations(item).size)
     cells.mkString("|", "|", "|")
   }
 

@@ -53,4 +53,4 @@ extension on (project: Project) with
 
 extension on (project: CommunityProject)(given e: Ecosystem) with
   def dependencies: Set[CommunityProject] = e.dependenciesOf(project.name)
-  // inline def exec(cmd: String): Unit = impl.exec(cmd, project.dir.toJava)
+  inline def exec(cmd: String): Unit = impl.exec(cmd, project.dir)

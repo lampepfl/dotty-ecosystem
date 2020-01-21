@@ -72,13 +72,20 @@ def executeCommand(cmd: Command): Unit =
 
       cmd match
         case Show(name) =>
-          println(s"""
-            |Project: ${project.name}
-            |Staging: ${project.origin}
-            |Upstream: ${project.upstream}
-            |Upstream branch: upstream/${project.upstreamBranch}
-            |Dependencies: ${project.dependencies.map(_.name).mkString(", ")}
-          """.stripMargin)
+          val table = List(
+            "Name" :: "Value" :: Nil,
+            "Project" :: project.name :: Nil,
+            "Our fork" :: url(project.origin) + " " :: Nil, // Whitespace to make it clickable in the terminal
+            "Fork branch" :: (
+              if project.originBranch ne null then red(project.originBranch)
+              else green("GitHub Default")) :: Nil,
+            "Upstream" :: url(project.upstream) + " " :: Nil,
+            "Upstream branch" :: s"upstream/${project.upstreamBranch}" :: Nil,
+            "Dependencies" :: (
+              if project.dependencies.nonEmpty then
+                project.dependencies.map(_.name).mkString(", ")
+              else "None") :: Nil)
+          println(Tabulator.format(table))
 
         case Clone(name) =>
           val git = Git.cloneRepository()

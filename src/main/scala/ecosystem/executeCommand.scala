@@ -43,7 +43,7 @@ def executeCommand(cmd: Command): Unit =
           val ciTracking     = if report.ciHash == report.originHeadHash then green("√") else red("X")
           project.name :: mainBranch :: aheadUpstream :: behindUpstream :: ciTracking :: Nil
       val reportTable: List[List[String]] = reportTableHeader :: reportTableValues
-      println(Tabulator.format(reportTable))
+      println(table(reportTable))
 
     case UpdateDotty =>
       val git =
@@ -72,7 +72,7 @@ def executeCommand(cmd: Command): Unit =
 
       cmd match
         case Show(name) =>
-          val table = List(
+          val showTable = List(
             "Name" :: "Value" :: Nil,
             "Project" :: project.name :: Nil,
             "Our fork" :: url(project.origin) + " " :: Nil, // Whitespace to make it clickable in the terminal
@@ -85,7 +85,7 @@ def executeCommand(cmd: Command): Unit =
               if project.dependencies.nonEmpty then
                 project.dependencies.map(_.name).mkString(", ")
               else "None") :: Nil)
-          println(Tabulator.format(table))
+          println(table(showTable))
 
         case Clone(name) =>
           val git = Git.cloneRepository()

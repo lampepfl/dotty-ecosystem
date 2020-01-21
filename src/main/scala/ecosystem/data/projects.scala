@@ -32,10 +32,11 @@ given projects: Ecosystem
     upstream = "https://github.com/typelevel/algebra.git"
   )
 
-  // defineSbt("better-files")(
-  //   origin = "https://github.com/dotty-staging/better-files.git",
-  //   upstream = "https://github.com/pathikrit/better-files.git"
-  // )
+  defineSbt("better-files")(
+    origin = "https://github.com/dotty-staging/better-files.git",
+    upstream = "https://github.com/pathikrit/better-files.git",
+    submoduleName = "betterfiles"
+  )
 
   defineSbt("scalacheck")(
     origin = "https://github.com/dotty-staging/scalacheck.git",

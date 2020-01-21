@@ -18,7 +18,8 @@ class Ecosystem
       upstream: String,
       upstreamBranch: String = "master",
       baseCommand: String => String,
-      dependencies: List[String] = Nil
+      dependencies: List[String] = Nil,
+      submoduleName: String = null
     ): CommunityProject =
     val project = CommunityProject(
       name = name,
@@ -29,7 +30,8 @@ class Ecosystem
       compileCommand = version => s"${baseCommand(version)}.compile",
       testCommand = version => s"${baseCommand(version)}.test",
       publishLocalCommand = version => s"${baseCommand(version)}.publishLocal",
-      cleanCommand = "rm -rf out/"
+      cleanCommand = "rm -rf out/",
+      submoduleName = if submoduleName ne null then submoduleName else name
     )
     register(project, dependencies)
     project
@@ -38,7 +40,8 @@ class Ecosystem
       origin: String,
       originBranch: String = null,
       upstream: String,
-      upstreamBranch: String = "master"
+      upstreamBranch: String = "master",
+      submoduleName: String = null
     ): CommunityProject =
     val project = CommunityProject(
       name = name,
@@ -50,6 +53,7 @@ class Ecosystem
       testCommand = null,
       publishLocalCommand = null,
       cleanCommand = "rm -rf target/",
+      submoduleName = if submoduleName ne null then submoduleName else name
     )
     register(project, Nil)
     project

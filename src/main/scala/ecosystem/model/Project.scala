@@ -28,6 +28,7 @@ case class CommunityProject(
   testCommand: String => String,
   publishLocalCommand: String => String,
   cleanCommand: String,
+  submoduleName: String
 ) extends Project
 
 /**

@@ -72,20 +72,34 @@ def executeCommand(cmd: Command): Unit =
 
       cmd match
         case Show(name) =>
+          def printCommand(commandName: String, versionToCommand: String => String) =
+            val cmdString =
+              if versionToCommand ne null
+                versionToCommand(dottyVersion)
+              else red("N/A")
+            println(s"${bold(commandName)}\n${cmdString}\n")
+
           val showTable = List(
             "Name" :: "Value" :: Nil,
             "Project" :: project.name :: Nil,
             "Our fork" :: url(project.origin) + " " :: Nil, // Whitespace to make it clickable in the terminal
             "Fork branch" :: (
               if project.originBranch ne null then red(project.originBranch)
-              else green("GitHub Default")) :: Nil,
+              else "GitHub Default") :: Nil,
             "Upstream" :: url(project.upstream) + " " :: Nil,
             "Upstream branch" :: s"upstream/${project.upstreamBranch}" :: Nil,
             "Dependencies" :: (
-              if project.dependencies.nonEmpty then
-                project.dependencies.map(_.name).mkString(", ")
-              else "None") :: Nil)
+              if project.dependencies.nonEmpty
+              then project.dependencies.map(_.name).mkString(", ")
+              else "None") :: Nil,
+          )
           println(table(showTable))
+          List[(String, String => String)](
+            ("Compile", project.compileCommand),
+            ("Test", project.testCommand),
+            ("Publish local", project.publishLocalCommand),
+            ("Clean", _ => project.cleanCommand),
+          ).foreach(printCommand)
 
         case Clone(name) =>
           val git = Git.cloneRepository()

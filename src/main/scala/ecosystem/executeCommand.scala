@@ -8,7 +8,7 @@ import org.jline.reader.UserInterruptException
 
 import org.eclipse.jgit.api._
 import org.eclipse.jgit.lib._
-import org.eclipse.jgit.api.errors.RefAlreadyExistsException
+import org.eclipse.jgit.api.errors._
 import org.eclipse.jgit.transport.URIish
 import org.eclipse.jgit.submodule.SubmoduleWalk
 
@@ -41,7 +41,7 @@ def executeCommand(cmd: Command): Unit =
           val mainBranch     = checkPredicate(report.mainBranch, _ == "dotty-community-build")
           val aheadUpstream  = checkPredicate(report.aheadUpstream, _ == 0)
           val behindUpstream = checkPredicate(report.behindUpstream, _ == 0)
-          val ciTracking     = if report.ciHash == report.originHeadHash then green("√") else red("X")
+          val ciTracking     = report.ciTrackingStatus.render
           project.name :: mainBranch :: aheadUpstream :: behindUpstream :: ciTracking :: Nil
       val reportTable: List[List[String]] = reportTableHeader :: reportTableValues
       println(table(reportTable))
@@ -65,7 +65,10 @@ def executeCommand(cmd: Command): Unit =
           .setUri(URIish("https://github.com/dotty-staging/dotty.git"))
           .call()
       info("Pulling the latest Dotty changes")
-      git.pull.call()
+      try git.pull.call()
+      catch
+        case e: RefNotAdvertisedException =>
+          warning(s"Failed to pull latest Dotty changes: ${e.getMessage}")
       info("Updating Dotty submodules. If working against a fresh clone, this might take a few minutes.")
       dotty.exec("git submodule update")  // JGit API fails in certain situations command line API knows how to handle
       git.close()
@@ -149,7 +152,7 @@ def executeCommand(cmd: Command): Unit =
             |Main branch: ${checkPredicate(report.mainBranch, _ == "dotty-community-build")}
             |Ahead upstream: ${checkPredicate(report.aheadUpstream, _ == 0)}
             |Behind upstream: ${checkPredicate(report.behindUpstream, _ == 0)}
-            |CI hash == Origin head hash: ${checkPredicate((report.ciHash, report.originHeadHash), t => t._1 == t._2, t => s"${t._1} == ${t._2}")}
+            |CI Tracking: CI[${report.ciHash}] ${report.ciTrackingStatus.render} Origin[${report.originHeadHash}]
           """.stripMargin)
 
         case UpdateCiTracking(name) =>

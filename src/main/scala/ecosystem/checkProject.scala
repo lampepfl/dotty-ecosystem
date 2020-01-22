@@ -6,6 +6,7 @@ import org.eclipse.jgit.lib._
 import org.eclipse.jgit.api._
 import org.eclipse.jgit.transport.URIish
 import org.eclipse.jgit.submodule.SubmoduleWalk
+import org.eclipse.jgit.revwalk.RevWalk
 
 import ecosystem.impl._
 import ecosystem.model.{ given, _ }
@@ -21,12 +22,21 @@ def checkProject(project: CommunityProject, ciTrackingCache: Map[String, String]
   val originHeadHash = git.getRepository.findRef("HEAD").getObjectId.getName
   val ciHash = Option(ciTrackingCache).getOrElse(buildCiTrackingCache())(project.submoduleName)
 
+  val revWalk = RevWalk(git.getRepository)
+  val originHeadCommit = revWalk.parseCommit(ObjectId.fromString(originHeadHash))
+  val ciCommit = revWalk.parseCommit(ObjectId.fromString(ciHash))
+
+  val isCiAhead  = revWalk.isMergedInto(originHeadCommit, ciCommit)
+  val isCiBehind = revWalk.isMergedInto(ciCommit, originHeadCommit)
+
   CheckReport(
     mainBranch = branch,
     aheadUpstream = trackingStatus.getAheadCount,
     behindUpstream = trackingStatus.getBehindCount,
     ciHash = ciHash,
-    originHeadHash = originHeadHash
+    originHeadHash = originHeadHash,
+    isCiAhead = isCiAhead,
+    isCiBehind = isCiBehind
   )
 }
 

@@ -40,7 +40,8 @@ given projects: Ecosystem
 
   defineSbt("scalacheck")(
     origin = "https://github.com/dotty-staging/scalacheck.git",
-    upstream = "https://github.com/typelevel/scalacheck.git"
+    upstream = "https://github.com/typelevel/scalacheck.git",
+    sbtTestCommand = "jvm/test"
   )
 
   defineSbt("ScalaPB")(

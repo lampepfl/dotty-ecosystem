@@ -10,6 +10,7 @@ import org.eclipse.jgit.api._
 import org.eclipse.jgit.lib._
 import org.eclipse.jgit.api.errors.RefAlreadyExistsException
 import org.eclipse.jgit.transport.URIish
+import org.eclipse.jgit.submodule.SubmoduleWalk
 
 import ecosystem.impl._
 import ecosystem.model.{ given, _ }
@@ -57,10 +58,16 @@ def executeCommand(cmd: Command): Unit =
           git0.submoduleInit.call()
           git0
         else Git.open(dotty.dir.toJava)
+      if !git.getRepository.getRemoteNames.asScala("staginga")
+        info("Adding staging remote to Dotty repo")
+        git.remoteAdd
+          .setName("staging")
+          .setUri(URIish("https://github.com/dotty-staging/dotty.git"))
+          .call()
       info("Pulling the latest Dotty changes")
       git.pull.call()
       info("Updating Dotty submodules. If working against a fresh clone, this might take a few minutes.")
-      git.submoduleUpdate.call()
+      dotty.exec("git submodule update")  // JGit API fails in certain situations command line API knows how to handle
       git.close()
 
     case cmd: ProjectCommand =>
@@ -72,20 +79,15 @@ def executeCommand(cmd: Command): Unit =
 
       cmd match
         case Show(name) =>
-          def printCommand(commandName: String, versionToCommand: String => String) =
-            val cmdString =
-              if versionToCommand ne null
-                versionToCommand(dottyVersion)
-              else red("N/A")
+          def printCommand(commandName: String, versionToCommand: Option[String => String]) =
+            val cmdString = versionToCommand.map(_(dottyVersion)).getOrElse(red("N/A"))
             println(s"${bold(commandName)}\n${cmdString}\n")
 
           val showTable = List(
             "Name" :: "Value" :: Nil,
             "Project" :: project.name :: Nil,
             "Our fork" :: url(project.origin) + " " :: Nil, // Whitespace to make it clickable in the terminal
-            "Fork branch" :: (
-              if project.originBranch ne null then red(project.originBranch)
-              else "GitHub Default") :: Nil,
+            "Fork branch" :: project.originBranch.map(red).getOrElse("GitHub default") :: Nil,
             "Upstream" :: url(project.upstream) + " " :: Nil,
             "Upstream branch" :: s"upstream/${project.upstreamBranch}" :: Nil,
             "Dependencies" :: (
@@ -94,11 +96,11 @@ def executeCommand(cmd: Command): Unit =
               else "None") :: Nil,
           )
           println(table(showTable))
-          List[(String, String => String)](
+          List[(String, Option[String => String])](
             ("Compile", project.compileCommand),
             ("Test", project.testCommand),
             ("Publish local", project.publishLocalCommand),
-            ("Clean", _ => project.cleanCommand),
+            ("Clean", Some(_ => project.cleanCommand)),
           ).foreach(printCommand)
 
         case Clone(name) =>
@@ -123,16 +125,15 @@ def executeCommand(cmd: Command): Unit =
             git.fetch.setRemote("upstream").call()
           }
 
-        case Clean(name) => exec(project.cleanCommand, project.dir)
+        case Clean(name) => project.exec(project.cleanCommand)
 
         case cmd: BuildCommand =>
           project.dependencies.foreach { dep => PublishLocal(dep.name, cmd.scalaVersion).execute() }
 
-          def execBuild(shellCmd: String => String, version: String) =
-            if shellCmd ne null
-              exec(shellCmd(version), project.dir)
-            else
-              error(s"Project ${cmd.projectName} doesn't know the shell command to " +
+          def execBuild(shellCmd: Option[String => String], version: String) =
+            shellCmd match
+              case Some(cmd) => project.exec(cmd(version))
+              case None => error(s"Project ${cmd.projectName} doesn't know the shell command to " +
                 s"execute for `$cmd`")
 
           cmd match
@@ -151,10 +152,31 @@ def executeCommand(cmd: Command): Unit =
             |CI hash == Origin head hash: ${checkPredicate((report.ciHash, report.originHeadHash), t => t._1 == t._2, t => s"${t._1} == ${t._2}")}
           """.stripMargin)
 
-def checkoutBranchIfNotExists(branch: String, git: Git): Unit =
-  if branch ne null
-    warning(s"A non-standard branch `$branch` was specified")
+        case UpdateCiTracking(name) =>
+          UpdateDotty.execute()
+          val report = checkProject(project)
+          val originHead = report.originHeadHash
 
+          project.withSubmoduleGit { git =>
+            git.fetch.setRemote("origin").call()
+            git.checkout.setName(report.originHeadHash).call()
+          }
+
+          dotty.withGit { git =>
+            git.checkout
+              .setName(s"update-ci-$name-to-${report.originHeadHash}")
+              .setCreateBranch(true)
+              .call()
+            git.add
+              .addFilepattern(s"community-build/community-projects/${project.submoduleName}")
+              .call()
+            git.commit
+              .setMessage(s"Update CI tracking for $name")
+              .call()
+          }
+
+def checkoutBranchIfNotExists(branchOpt: Option[String], git: Git): Unit =
+  for branch <- branchOpt do
     val createBranch =
       !git.branchList.call().asScala.exists(_.getName == Constants.R_HEADS + branch)
 

@@ -24,12 +24,12 @@ class Ecosystem
     val project = CommunityProject(
       name = name,
       origin = origin,
-      originBranch = originBranch,
+      originBranch = Option(originBranch),
       upstream = upstream,
       upstreamBranch = upstreamBranch,
-      compileCommand = version => s"${baseCommand(version)}.compile",
-      testCommand = version => s"${baseCommand(version)}.test",
-      publishLocalCommand = version => s"${baseCommand(version)}.publishLocal",
+      compileCommand = Some((version: String) => s"${baseCommand(version)}.compile"),
+      testCommand = Some((version: String) => s"${baseCommand(version)}.test"),
+      publishLocalCommand = Some((version: String) => s"${baseCommand(version)}.publishLocal"),
       cleanCommand = "rm -rf out/",
       submoduleName = Option(submoduleName).getOrElse(name)
     )
@@ -51,12 +51,12 @@ class Ecosystem
     val project = CommunityProject(
       name = name,
       origin = origin,
-      originBranch = originBranch,
+      originBranch = Option(originBranch),
       upstream = upstream,
       upstreamBranch = upstreamBranch,
-      compileCommand = Option(sbtCompileCommand).map(suffix => (version: String) => sbtCommand(version, suffix)).orNull,
-      testCommand = Option(sbtTestCommand).map(suffix => (version: String) => sbtCommand(version, suffix)).orNull,
-      publishLocalCommand = Option(sbtPublishLocalCommand).map(suffix => (version: String) => sbtCommand(version, suffix)).orNull,
+      compileCommand = Option(sbtCompileCommand).map(suffix => (version: String) => sbtCommand(version, suffix)),
+      testCommand = Option(sbtTestCommand).map(suffix => (version: String) => sbtCommand(version, suffix)),
+      publishLocalCommand = Option(sbtPublishLocalCommand).map(suffix => (version: String) => sbtCommand(version, suffix)),
       cleanCommand = "rm -rf target/",
       submoduleName = Option(submoduleName).getOrElse(name)
     )

@@ -55,6 +55,7 @@ def commandCompleter = StringsCompleter(
   "compile",
   "test",
   "publishLocal",
+  "updateCiTracking"
 )
 
 def projectCompleter(given e: Ecosystem) =

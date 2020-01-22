@@ -13,11 +13,12 @@ sealed trait ProjectCommand extends Command
 sealed trait BuildCommand extends ProjectCommand
   def scalaVersion: String
 
-case class Show  (projectName: String) extends ProjectCommand { override def toString = s"show $projectName" }
-case class Clone (projectName: String) extends ProjectCommand { override def toString = s"clone $projectName" }
-case class Update(projectName: String) extends ProjectCommand { override def toString = s"update $projectName" }
-case class Check (projectName: String) extends ProjectCommand { override def toString = s"check $projectName" }
-case class Clean (projectName: String) extends ProjectCommand { override def toString = s"clean $projectName" }
+case class Show            (projectName: String) extends ProjectCommand { override def toString = s"show $projectName" }
+case class Clone           (projectName: String) extends ProjectCommand { override def toString = s"clone $projectName" }
+case class Update          (projectName: String) extends ProjectCommand { override def toString = s"update $projectName" }
+case class Check           (projectName: String) extends ProjectCommand { override def toString = s"check $projectName" }
+case class Clean           (projectName: String) extends ProjectCommand { override def toString = s"clean $projectName" }
+case class UpdateCiTracking(projectName: String) extends ProjectCommand { override def toString = s"updateCiTracking $projectName" }
 
 case class Compile     (projectName: String, scalaVersion: String) extends BuildCommand   { override def toString = s"compile $projectName $scalaVersion" }
 case class Test        (projectName: String, scalaVersion: String) extends BuildCommand   { override def toString = s"test $projectName $scalaVersion" }
@@ -52,5 +53,6 @@ def parseCommand(line: String): Command =
     case "compile" :: project :: args => Compile(project, versionArg(args))
     case "test" :: project :: args => Test(project, versionArg(args))
     case "publishLocal" :: project :: args => PublishLocal(project, versionArg(args))
+    case "updateCiTracking" :: project :: Nil => UpdateCiTracking(project)
 
     case _ => throw ParseException(s"Unknown command: $line")

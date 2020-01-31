@@ -19,6 +19,7 @@ case class Update          (projectName: String) extends ProjectCommand { overri
 case class Check           (projectName: String) extends ProjectCommand { override def toString = s"check $projectName" }
 case class Clean           (projectName: String) extends ProjectCommand { override def toString = s"clean $projectName" }
 case class UpdateCiTracking(projectName: String) extends ProjectCommand { override def toString = s"updateCiTracking $projectName" }
+case class PublishLocalDeps(projectName: String, scalaVersion: String) extends ProjectCommand { override def toString = s"publishLocalDeps $projectName $scalaVersion" }
 
 case class Compile     (projectName: String, scalaVersion: String) extends BuildCommand   { override def toString = s"compile $projectName $scalaVersion" }
 case class Test        (projectName: String, scalaVersion: String) extends BuildCommand   { override def toString = s"test $projectName $scalaVersion" }
@@ -54,5 +55,6 @@ def parseCommand(line: String): Command =
     case "test" :: project :: args => Test(project, versionArg(args))
     case "publishLocal" :: project :: args => PublishLocal(project, versionArg(args))
     case "updateCiTracking" :: project :: Nil => UpdateCiTracking(project)
+    case "publishLocalDeps" :: project :: args => PublishLocalDeps(project, versionArg(args))
 
     case _ => throw ParseException(s"Unknown command: $line")

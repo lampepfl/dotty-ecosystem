@@ -131,7 +131,7 @@ def executeCommand(cmd: Command): Unit =
         case Clean(name) => project.exec(project.cleanCommand)
 
         case cmd: BuildCommand =>
-          project.dependencies.foreach { dep => PublishLocal(dep.name, cmd.scalaVersion).execute() }
+          PublishLocalDeps(cmd.projectName, cmd.scalaVersion).execute()
 
           def execBuild(shellCmd: Option[String => String], version: String) =
             shellCmd match
@@ -143,6 +143,9 @@ def executeCommand(cmd: Command): Unit =
             case Compile(name, version) => execBuild(project.compileCommand, version)
             case Test(name, version) => execBuild(project.testCommand, version)
             case PublishLocal(name, version) => execBuild(project.publishLocalCommand, version)
+
+        case PublishLocalDeps(name, version) =>
+          project.dependencies.foreach { dep => PublishLocal(dep.name, version).execute() }
 
         case Check(name) =>
           UpdateDotty.execute()

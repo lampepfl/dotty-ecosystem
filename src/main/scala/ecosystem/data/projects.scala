@@ -52,7 +52,8 @@ given projects: Ecosystem
   defineSbt("scalatest")(
     origin = "https://github.com/dotty-staging/scalatest.git",
     upstream = "https://github.com/scalatest/scalatest.git",
-    upstreamBranch = "3.1.x"
+    upstreamBranch = "3.1.x",
+    sbtTestCommand = "scalacticDotty/clean;scalacticTestDotty/test;scalatestTestDotty/test"
   )
 
   defineSbt("scopt")(

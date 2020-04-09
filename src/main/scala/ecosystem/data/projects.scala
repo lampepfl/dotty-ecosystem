@@ -23,7 +23,8 @@ given projects: Ecosystem
   defineMill("upickle")(
     origin = "https://github.com/dotty-staging/upickle.git",
     upstream = "https://github.com/lihaoyi/upickle.git",
-    baseCommand = version => s"""./mill -i -D dottyVersion="$version" ujson.jvm[$version]"""
+    baseCommand = version => s"""./mill -i -D dottyVersion="$version" ujson.jvm[$version]""",
+    dependencies = List("sourcecode", "utest", "scalatest", "scalacheck", "scalatestplus-scalacheck")
   )
 
   // TODO: below projects don't have commands
@@ -41,7 +42,8 @@ given projects: Ecosystem
   defineSbt("scalacheck")(
     origin = "https://github.com/dotty-staging/scalacheck.git",
     upstream = "https://github.com/typelevel/scalacheck.git",
-    sbtTestCommand = "jvm/test"
+    sbtTestCommand = "jvm/test",
+    sbtPublishLocalCommand = "set jvm/publishArtifact in (Compile, packageDoc) := false ;jvm/publishLocal"
   )
 
   defineSbt("ScalaPB")(
@@ -53,7 +55,8 @@ given projects: Ecosystem
     origin = "https://github.com/dotty-staging/scalatest.git",
     upstream = "https://github.com/scalatest/scalatest.git",
     upstreamBranch = "3.1.x",
-    sbtTestCommand = "scalacticDotty/clean;scalacticTestDotty/test;scalatestTestDotty/test"
+    sbtTestCommand = "scalacticDotty/clean;scalacticTestDotty/test;scalatestTestDotty/test",
+    sbtPublishLocalCommand = "scalacticDotty/publishLocal; scalatestDotty/publishLocal"
   )
 
   defineSbt("scopt")(
@@ -122,5 +125,6 @@ given projects: Ecosystem
 
   defineSbt("scalatestplus-scalacheck")(
     origin = "https://github.com/dotty-staging/scalatestplus-scalacheck.git",
-    upstream = "https://github.com/scalatest/scalatestplus-scalacheck.git"
+    upstream = "https://github.com/scalatest/scalatestplus-scalacheck.git",
+    sbtPublishLocalCommand = "scalatestPlusScalaCheckJVM/publishLocal"
   )

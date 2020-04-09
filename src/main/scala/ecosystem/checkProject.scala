@@ -9,8 +9,8 @@ import org.eclipse.jgit.submodule.SubmoduleWalk
 import org.eclipse.jgit.revwalk.RevWalk
 
 import ecosystem.impl._
-import ecosystem.model.{ given, _ }
-import ecosystem.data.{ given, _ }
+import ecosystem.model.{ given _, _ }
+import ecosystem.data.{ given _, _ }
 import ecosystem.rendering._
 
 def checkProject(project: CommunityProject, ciTrackingCache: Map[String, String] = null): CheckReport = project.withGit { git =>

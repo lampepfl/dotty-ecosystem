@@ -13,8 +13,8 @@ import org.eclipse.jgit.transport.URIish
 import org.eclipse.jgit.submodule.SubmoduleWalk
 
 import ecosystem.impl._
-import ecosystem.model.{ given, _ }
-import ecosystem.data.{ given, _ }
+import ecosystem.model.{ given _, _ }
+import ecosystem.data.{ given _, _ }
 import ecosystem.rendering._
 
 

@@ -10,7 +10,7 @@ import ecosystem.data.workdir
 import ecosystem.impl
 
 /** A Git project */
-trait Project
+trait Project:
   val name: String
   val origin: String
 
@@ -41,7 +41,7 @@ lazy val dotty = new Project {
   val origin = "https://github.com/lampepfl/dotty.git"
 }
 
-def (name: String) asProject (given e: Ecosystem) = e.project(name)
+def (name: String) asProject (using e: Ecosystem) = e.project(name)
 
 private def doWithGit[T](git: Git, f: Git => T): T =
   val res =
@@ -49,7 +49,7 @@ private def doWithGit[T](git: Git, f: Git => T): T =
     finally git.close()
   res
 
-extension on (project: Project) with
+extension on (project: Project):
   def dir: File = workdir/project.name
   def isCloned = project.dir.exists
   def withGit[T](f: Git => T): T =
@@ -58,7 +58,7 @@ extension on (project: Project) with
 
 
 
-extension on (project: CommunityProject)(given e: Ecosystem) with
+extension on (project: CommunityProject)(using e: Ecosystem):
   def dependencies: Set[CommunityProject] = e.dependenciesOf(project.name)
   def submoduleDir: File = dotty.dir/"community-build/community-projects"/project.submoduleName
   def withSubmoduleGit[T](f: Git => T): T = dotty.withGit { dottyGit =>

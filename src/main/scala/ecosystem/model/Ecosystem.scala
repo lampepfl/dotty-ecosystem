@@ -2,7 +2,7 @@ package ecosystem.model
 
 import collection.mutable
 
-class Ecosystem
+class Ecosystem:
   private val projectsStore = mutable.Map.empty[String, CommunityProject]
   private val dependenciesStore = mutable.Map.empty[String, Set[String]]
 

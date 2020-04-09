@@ -10,7 +10,7 @@ case class CheckReport(
   originHeadHash: String,
   isCiAhead: Boolean,
   isCiBehind: Boolean,
-)
+):
   def ciTrackingStatus: CITrackingStatus =
     import CITrackingStatus._
     if ciHash == originHeadHash then Equal
@@ -18,7 +18,7 @@ case class CheckReport(
     else if isCiAhead then Ahead
     else Behind
 
-enum CITrackingStatus
+enum CITrackingStatus:
   case Ahead, Behind, Unrelated, Equal
 
   def render = this match

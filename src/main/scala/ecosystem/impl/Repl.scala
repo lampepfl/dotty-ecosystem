@@ -59,7 +59,7 @@ def commandCompleter = StringsCompleter(
   "publishLocalDeps"
 )
 
-def projectCompleter(given e: Ecosystem) =
+def projectCompleter(using e: Ecosystem) =
   StringsCompleter(e.all.map(_.name): _*)
 
 def scalaVersionCompleter = StringsCompleter(

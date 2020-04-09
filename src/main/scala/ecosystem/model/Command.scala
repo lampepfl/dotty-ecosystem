@@ -6,11 +6,11 @@ import ecosystem.data.dottyVersion
 sealed trait Command
 
 /** A command to be executed in the context of a project */
-sealed trait ProjectCommand extends Command
+sealed trait ProjectCommand extends Command:
   def projectName: String
 
 /** A command that involves running a build tool on the project */
-sealed trait BuildCommand extends ProjectCommand
+sealed trait BuildCommand extends ProjectCommand:
   def scalaVersion: String
 
 case class Show            (projectName: String) extends ProjectCommand { override def toString = s"show $projectName" }

@@ -2,7 +2,7 @@ package ecosystem.data
 
 import ecosystem.model._
 
-given projects: Ecosystem
+given projects as Ecosystem:
   defineMill("utest")(
     origin = "https://github.com/dotty-staging/utest.git",
     upstream = "https://github.com/lihaoyi/utest.git",

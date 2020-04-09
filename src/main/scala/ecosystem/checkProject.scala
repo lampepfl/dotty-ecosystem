@@ -19,6 +19,9 @@ def checkProject(project: CommunityProject, ciTrackingCache: Map[String, String]
   val trackingStatus = doWhileTracking(repo, branch, "upstream", project.upstreamBranch) {
     BranchTrackingStatus.of(repo, branch)
   }
+  if trackingStatus eq null then
+    error(s"Upstream not specified or not synced for ${project.name}")
+
   val originHeadHash = git.getRepository.findRef("HEAD").getObjectId.getName
   val ciHash = Option(ciTrackingCache).getOrElse(buildCiTrackingCache())(project.submoduleName)
 

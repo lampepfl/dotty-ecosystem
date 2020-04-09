@@ -58,19 +58,27 @@ def executeCommand(cmd: Command): Unit =
           git0.submoduleInit.call()
           git0
         else Git.open(dotty.dir.toJava)
-      if !git.getRepository.getRemoteNames.asScala("staginga")
+
+      if !git.getRepository.getRemoteNames.asScala("staging")
         info("Adding staging remote to Dotty repo")
         git.remoteAdd
           .setName("staging")
           .setUri(URIish("https://github.com/dotty-staging/dotty.git"))
           .call()
+
       info("Pulling the latest Dotty changes")
       try git.pull.call()
       catch
         case e: RefNotAdvertisedException =>
           warning(s"Failed to pull latest Dotty changes: ${e.getMessage}")
       info("Updating Dotty submodules. If working against a fresh clone, this might take a few minutes.")
+      dotty.exec("git submodule sync")
       dotty.exec("git submodule update")  // JGit API fails in certain situations command line API knows how to handle
+
+      if !sbtPluginFile.exists
+        info(s"No SBT plugin file found at $sbtPluginFile, generating it now")
+        dotty.exec("sbt community-build/prepareCommunityBuild")
+
       git.close()
 
     case cmd: ProjectCommand =>

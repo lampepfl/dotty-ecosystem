@@ -1,6 +1,7 @@
 package ecosystem.model
 
 import collection.mutable
+import ecosystem.data.sbtPluginFile
 
 class Ecosystem:
   private val projectsStore = mutable.Map.empty[String, CommunityProject]
@@ -47,7 +48,10 @@ class Ecosystem:
       sbtPublishLocalCommand: String = null,
     ): CommunityProject =
     def sbtCommand(version: String, sbtSuffix: String) =
-      s"""sbt ";set updateOptions in Global ~= (_.withLatestSnapshots(false)) ;++$version! ;$sbtSuffix" """
+      val options = s"-sbt-version 1.3.8 -Dsbt.supershell=false --addPluginSbtFile=${sbtPluginFile.path.toAbsolutePath.toString}"
+      val base = s";clean ;set logLevel in Global := Level.Error ;set updateOptions in Global ~= (_.withLatestSnapshots(false)) ;++$version! "
+      s"""sbt $options "$base ;$sbtSuffix" """
+
     val project = CommunityProject(
       name = name,
       origin = origin,

@@ -15,7 +15,7 @@ So far, `BuildCommand`s are unsupported for SBT projects.
 
 # Community build policy [draft]
 1. Each project consists of the origin and upstream branch.
-2. The syncing is done via merges: first merge upstream into origin, then submit PR to upstream.
+2. The syncing is done via rebases to maintain linear history.
 3. Each project has the capability to force the Scala version from the command line when working with its build tool.
 4. Sanity rules: the following is the desired state of each project:
     1. Main branch name is standardized.

@@ -26,14 +26,14 @@ given projects as Ecosystem:
     baseCommand = version => s"""./mill -i -D dottyVersion="$version" ujson.jvm[$version]""",
     dependencies = List("sourcecode", "utest", "scalatest", "scalacheck", "scalatestplus-scalacheck", "geny")
   )
-/*
+
   defineMill("geny")(
     origin = "https://github.com/dotty-staging/geny.git",
     upstream = "https://github.com/lihaoyi/geny.git",
     baseCommand = version => s"""./mill -i -D dottyVersion="$version" geny.jvm[$version]""",
     dependencies = List("utest")
   )
-*/
+
   // TODO: below projects don't have commands
   defineSbt("algebra")(
     origin = "https://github.com/dotty-staging/algebra.git",

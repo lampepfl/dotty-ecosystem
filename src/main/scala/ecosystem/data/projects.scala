@@ -23,7 +23,7 @@ given projects as Ecosystem:
   defineMill("upickle")(
     origin = "https://github.com/dotty-staging/upickle.git",
     upstream = "https://github.com/lihaoyi/upickle.git",
-    baseCommand = version => s"""./mill -i -D dottyVersion="$version" ujson.jvm[$version]""",
+    baseCommand = version => s"""./mill -i -D dottyVersion="$version" upickle.jvm[$version]""",
     dependencies = List("sourcecode", "utest", "scalatest", "scalacheck", "scalatestplus-scalacheck", "geny")
   )
 

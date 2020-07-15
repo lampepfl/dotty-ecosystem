@@ -34,6 +34,13 @@ given projects as Ecosystem:
     dependencies = List("utest")
   )
 
+  defineMill("fansi")(
+    origin = "https://github.com/dotty-staging/fansi.git",
+    upstream = "https://github.com/lihaoyi/fansi.git",
+    baseCommand = version => s"""./mill -i -D dottyVersion="$version" fansi.jvm[$version]""",
+    dependencies = List("utest", "sourcecode")
+  )
+
   // TODO: below projects don't have commands
   defineSbt("algebra")(
     origin = "https://github.com/dotty-staging/algebra.git",

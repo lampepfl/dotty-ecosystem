@@ -1,4 +1,4 @@
-val dottyVersion = "0.24.0-bin-20200407-2352d90-NIGHTLY"
+val dottyVersion = "0.26.0-RC1"
 
 lazy val root = project
   .in(file("."))
@@ -13,5 +13,5 @@ lazy val root = project
     libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % "5.6.0.201912101111-r",
     libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.30",
 
-    libraryDependencies += "com.github.pathikrit" % "better-files_2.13" % "3.8.0"
+    libraryDependencies += ("com.github.pathikrit" %% "better-files" % "3.8.0").withDottyCompat(scalaVersion.value)
   )
